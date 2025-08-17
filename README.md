@@ -1,78 +1,111 @@
 
 
-# 🌿 Plant Leaf Disease Detection (CNN + GLCM Hybrid Model)
+# 🌿 Plant Leaf Disease Detection (Streamlit App)
 
-## 📌 Overview
-
-This repository contains the implementation of a **hybrid deep learning model** for plant leaf disease detection. The system combines **Convolutional Neural Networks (CNNs)** with **GLCM (Gray Level Co-occurrence Matrix) texture features**, enhancing the ability of the model to capture both **spatial patterns** (via CNN) and **texture-based features** (via GLCM).
-
-This approach achieves **high accuracy** while remaining lightweight, making it suitable for deployment in **resource-constrained environments** like mobile or embedded devices.
+A web-based app to detect plant leaf diseases using a hybrid deep learning model. It analyzes an uploaded leaf image, compares it with a healthy reference, predicts the health status, and shows infected regions visually.
 
 ---
 
-## ⚡ Key Features
+## 📱 App Features
 
-* 🌱 **Image Preprocessing**
-
-  * Resizing and normalization
-  * Data augmentation (rotation, flip, brightness adjustment)
-
-* 🧮 **Feature Extraction**
-
-  * GLCM features (contrast, correlation, energy, homogeneity) computed per leaf image
-  * Features concatenated with CNN-learned embeddings
-
-* 🤖 **Model Architecture**
-
-  * Lightweight **CNN backbone** for image feature extraction
-  * **GLCM features as additional input channels**
-  * Fully connected layers for final classification
-
-* 📊 **Performance Optimized**
-
-  * Hybrid CNN+GLCM model outperforms CNN-only and GLCM-only models
+* 📤 **Upload a leaf image** (JPEG, PNG)
+* 🟢 **Select a healthy reference leaf** from a local dataset
+* 🧠 **Model predicts**: Healthy or Diseased
+* 📊 **Infection level (%)** estimated from texture deviation
+* 🔬 **Infection heatmap overlay** on the original image (red/orange = more infection)
+* 💡 **Plant care suggestions** based on severity
+* 🎨 Clean and interactive **Streamlit UI** with blue theme
 
 ---
 
-## 📂 Dataset Structure
+## 🧠 How the Model Works
 
-This project expects the dataset to be organized as:
+The model is a **hybrid classifier** that combines:
+
+### 1. 🧠 CNN (Convolutional Neural Network)
+
+* Learns visual features from the **RGB leaf image** (e.g., color, shape, edges)
+* Architecture includes convolution, ReLU, max pooling, and flatten layers
+* Input image is resized to **64×64**
+
+### 2. 📊 GLCM Texture Features
+
+Extracted from the **grayscale version** of the leaf image using Gray-Level Co-occurrence Matrix (GLCM).
+
+These 6 statistical features are used:
+
+| Feature           | Description                                                   |
+| ----------------- | ------------------------------------------------------------- |
+| **Contrast**      | Measures local intensity variations (detects spotty patterns) |
+| **Dissimilarity** | Highlights differences in neighboring pixel intensities       |
+| **Homogeneity**   | Captures image uniformity (lower in diseased leaves)          |
+| **Energy**        | Represents textural uniformity                                |
+| **Correlation**   | Measures linear dependencies between pixels                   |
+| **ASM**           | Angular Second Moment — another uniformity indicator          |
+
+---
+
+## 🔀 Model Pipeline
+
+1. **Image Input**
+
+   * RGB image passed to CNN
+   * Grayscale image processed for GLCM features
+
+2. **Feature Fusion**
+
+   * CNN features and GLCM features are **concatenated**
+
+3. **Fully Connected Layers**
+
+   * Dense layers classify the input as:
+
+     * `0`: Diseased
+     * `1`: Healthy
+
+---
+
+## 📦 Required Libraries
+
+Install all dependencies:
+
+```bash
+pip install streamlit torch torchvision opencv-python-headless scikit-image matplotlib pillow numpy
+```
+
+---
+
+## 📁 Folder Setup
 
 ```
-dataset/
-│── train/
-│   ├── healthy/
-│   ├── diseased/
-│── val/
-│   ├── healthy/
-│   ├── diseased/
-│── test/
-    ├── healthy/
-    ├── diseased/
+project/
+├── app.py                  # Streamlit app
+├── hybrid_cnn_glcm.pth     # Trained PyTorch model
+└── dataset/
+    └── test/
+        └── healthy/        # Healthy reference leaf images (JPEG/PNG)
 ```
 
-* Compatible with **PlantVillage dataset** or custom leaf datasets.
+> The model will use one of the healthy leaves as a reference for infection comparison.
 
 ---
 
-## 📊 Results
+## 🚀 How to Run
 
-| Model                 | Accuracy | Key Strengths                                         |
-| --------------------- | -------- | ----------------------------------------------------- |
-| **CNN-only**          | 91%      | Learns spatial patterns, but misses texture info      |
-| **GLCM + MLP**        | 88%      | Lightweight, interpretable, uses handcrafted features |
-| **Hybrid CNN + GLCM** | **95%**  | Best trade-off, combines CNN + texture features       |
+1. Place your trained model file as `hybrid_cnn_glcm.pth` in the project folder
+2. Add healthy images to `dataset/test/healthy/`
+3. Launch the app:
 
----
+```bash
+streamlit run app.py
+```
 
-## 🔮 Future Scope
+<img width="1772" height="968" alt="Screenshot (122)" src="https://github.com/user-attachments/assets/ee06fb20-2783-4793-a194-22a0dd140ab4" />
+<img width="969" height="858" alt="Screenshot (123)" src="https://github.com/user-attachments/assets/657b962b-9ea7-4843-9fdd-624272401ddc" />
+<img width="883" height="860" alt="Screenshot (124)" src="https://github.com/user-attachments/assets/97710726-662d-4882-baf1-dbebfcf60ba8" />
+<img width="998" height="724" alt="Screenshot (125)" src="https://github.com/user-attachments/assets/3ecd50e8-fe29-4ea6-aeb8-fbf7c618b6a9" />
 
-* 📱 Deployment as a **mobile app** for real-time farmer usage
-* ☁️ Integration with **cloud dashboards** for crop health monitoring
-* 🖼️ Expansion to **multi-disease classification across crops**
-* 🌍 Implementation on **edge devices (Raspberry Pi, Jetson Nano)**
-* 🔎 Incorporate **explainability methods (Grad-CAM, SHAP)** for trust in predictions
 
----
 
-Do you also want me to include a **training & inference workflow diagram** (like the fall detection one) that shows **Image → Preprocessing → GLCM + CNN → Hybrid Model → Prediction** for your README?
+
+
